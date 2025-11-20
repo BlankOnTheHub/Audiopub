@@ -16,6 +16,10 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 DEFAULT_SPEED = 1.0
 DEFAULT_STEPS = 20 # Higher for better quality
 
+# Text Processing
+MIN_CHUNK_SIZE = 500  # Minimum characters per chunk
+MAX_CHUNK_SIZE = 1000 # Maximum characters per chunk (lower is safer for memory/quality)
+
 # Audio Settings
 CROSSFADE_MS = 50
 SILENCE_PADDING_MS = 150

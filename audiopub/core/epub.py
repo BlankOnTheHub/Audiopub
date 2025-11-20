@@ -70,10 +70,13 @@ class EpubParser:
         return text
 
     @staticmethod
-    def chunk_text(text: str, min_chunk_size: int = 1000, max_chunk_size: int = 2000) -> List[str]:
+    def chunk_text(text: str, min_chunk_size: int = None, max_chunk_size: int = None) -> List[str]:
         """
         Splits text into chunks of approximately max_chunk_size, breaking on sentence boundaries.
         """
+        from audiopub import config
+        if min_chunk_size is None: min_chunk_size = config.MIN_CHUNK_SIZE
+        if max_chunk_size is None: max_chunk_size = config.MAX_CHUNK_SIZE
         if not text:
             return []
 
