@@ -35,9 +35,10 @@ class Worker:
         self.cancel_event.clear()
         self.log(f"Starting conversion for {os.path.basename(epub_path)}")
 
-        temp_dir = os.path.join(output_dir, "temp_work")
+        book_name = os.path.splitext(os.path.basename(epub_path))[0]
+        temp_dir = os.path.join(output_dir, "temp_work", book_name)
         os.makedirs(temp_dir, exist_ok=True)
-        final_output = os.path.join(output_dir, os.path.splitext(os.path.basename(epub_path))[0] + ".m4b")
+        final_output = os.path.join(output_dir, book_name + ".m4b")
 
         try:
             # 1. Parse EPUB
