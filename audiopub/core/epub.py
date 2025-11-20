@@ -63,6 +63,10 @@ class EpubParser:
         return chapters
 
     def _clean_text(self, text: str) -> str:
+        # Normalize smart quotes/apostrophes
+        text = text.replace('‘', "'").replace('’', "'")
+        text = text.replace('“', '"').replace('”', '"')
+        
         # Normalize whitespace
         text = re.sub(r'\s+', ' ', text).strip()
         # Remove page numbers (e.g., "pg 45", "Page 12") - naive regex
