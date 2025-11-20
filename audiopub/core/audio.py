@@ -63,7 +63,7 @@ class AudioProcessor:
             "-i", metadata_path,
             "-map_metadata", "1",
             "-c:a", "aac",
-            "-b:a", "64k", # Good enough for voice
+            "-b:a", "192k", # Higher quality bitrate
             "-y",
             output_path
         ]

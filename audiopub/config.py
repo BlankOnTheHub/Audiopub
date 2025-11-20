@@ -14,7 +14,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # TTS Settings
 DEFAULT_SPEED = 1.0
-DEFAULT_STEPS = 5 # Lower for speed, higher for quality (usually 5-10 is enough)
+DEFAULT_STEPS = 20 # Higher for better quality
 
 # Audio Settings
 CROSSFADE_MS = 50
