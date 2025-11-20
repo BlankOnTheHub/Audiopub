@@ -40,6 +40,9 @@ output/
 temp_work/
 *.m4b
 *.wav
+*.epub
+test_*.py
+simulate_*.py
 
 # OS
 .DS_Store
@@ -47,6 +50,7 @@ Thumbs.db
 
 # Logs
 *.log
+*.txt.log
 
 # Jupyter Notebook
 .ipynb_checkpoints
