@@ -61,10 +61,12 @@ def check_lfs():
 @ui.page('/')
 def index():
     # State
-    epub_path = ui.state('')
-    output_dir = ui.state(config.OUTPUT_DIR)
-    selected_voice = ui.state(None)
-    is_processing = ui.state(False)
+    state = {
+        'epub_path': '',
+        'output_dir': config.OUTPUT_DIR,
+        'selected_voice': None,
+        'is_processing': False
+    }
 
     log_content = ""
     log_element = None
@@ -85,23 +87,23 @@ def index():
     worker.progress_callback = update_progress
 
     async def start_conversion():
-        if not epub_path.value:
+        if not state['epub_path']:
             ui.notify('Please select an EPUB file.', type='warning')
             return
-        if not output_dir.value:
+        if not state['output_dir']:
             ui.notify('Please select an output directory.', type='warning')
             return
-        if not selected_voice.value:
+        if not state['selected_voice']:
             ui.notify('Please select a voice.', type='warning')
             return
 
-        is_processing.value = True
+        state['is_processing'] = True
         progress_bar.set_value(0)
         update_log("--- Starting Conversion ---\n")
 
-        await worker.run_conversion(epub_path.value, output_dir.value, selected_voice.value)
+        await worker.run_conversion(state['epub_path'], state['output_dir'], state['selected_voice'])
 
-        is_processing.value = False
+        state['is_processing'] = False
         ui.notify('Process finished (check logs).')
 
     def stop_conversion():
@@ -124,7 +126,7 @@ def index():
             # File Inputs
             ui.label('EPUB File:')
             with ui.row().classes('w-full items-center'):
-                ui.input(value=epub_path).bind_value(epub_path).classes('flex-grow')
+                ui.input(value=state['epub_path']).bind_value(state, 'epub_path').classes('flex-grow')
                 # File picker button not native simple, using simple input for now or nicegui native file picker
                 # We'll use a simple notify to type path for now, or a dialog?
                 # NiceGUI has ui.upload but for local app we can use native file dialog if possible,
@@ -133,25 +135,25 @@ def index():
                 # I'll stick to text input for simplicity in "desktop" mode unless requested.
 
             ui.label('Output Directory:')
-            ui.input(value=output_dir).bind_value(output_dir).classes('w-full')
+            ui.input(value=state['output_dir']).bind_value(state, 'output_dir').classes('w-full')
 
             # Voice Selector
             ui.label('Voice:')
             voices = get_voices()
             # map full path to basename for display
             voice_options = {v: os.path.basename(v) for v in voices}
-            ui.select(options=voice_options, value=selected_voice).bind_value(selected_voice).classes('w-full')
+            ui.select(options=voice_options, value=state['selected_voice']).bind_value(state, 'selected_voice').classes('w-full')
 
             ui.separator()
 
             # Buttons
             with ui.row().classes('w-full gap-2'):
                 ui.button('Start Conversion', on_click=start_conversion)\
-                    .bind_enabled_from(is_processing, backward=lambda x: not x)\
+                    .bind_enabled_from(state, 'is_processing', backward=lambda x: not x)\
                     .classes('flex-grow bg-blue-600 text-white')
 
                 ui.button('Stop', on_click=stop_conversion)\
-                    .bind_enabled_from(is_processing)\
+                    .bind_enabled_from(state, 'is_processing')\
                     .classes('bg-red-500 text-white')
 
             # Progress
@@ -162,6 +164,6 @@ def index():
             ui.label('Logs').classes('text-xl font-bold mb-2')
             # Scrollable log area
             with ui.scroll_area().classes('w-full h-full border border-gray-700 p-2 rounded'):
-                log_element = ui.html('<pre></pre>').classes('font-mono text-sm')
+                log_element = ui.html('<pre></pre>', sanitize=False).classes('font-mono text-sm')
 
 ui.run(title='Audiopub', reload=False)
