@@ -49,7 +49,7 @@ class EpubParser:
                 for script in soup(["script", "style"]):
                     script.decompose()
 
-                text = soup.get_text(separator=' ')
+                text = soup.get_text(separator='\n\n')
 
                 # Clean text
                 cleaned_text = self._clean_text(text)
@@ -76,7 +76,8 @@ class EpubParser:
     @staticmethod
     def chunk_text(text: str, min_chunk_size: int = None, max_chunk_size: int = None) -> List[str]:
         """
-        Splits text into chunks of approximately max_chunk_size, breaking on sentence boundaries.
+        Splits text into chunks, preferring paragraph boundaries, then sentence boundaries.
+        Returns list of chunks with metadata about whether they end with a paragraph break.
         """
         from audiopub import config
         if min_chunk_size is None: min_chunk_size = config.MIN_CHUNK_SIZE
@@ -84,21 +85,30 @@ class EpubParser:
         if not text:
             return []
 
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        # Split into paragraphs first
+        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
         chunks = []
-        current_chunk = []
-        current_length = 0
-
-        for sentence in sentences:
-            if current_length + len(sentence) > max_chunk_size and current_length >= min_chunk_size:
-                chunks.append(" ".join(current_chunk))
-                current_chunk = [sentence]
-                current_length = len(sentence)
+        
+        for paragraph in paragraphs:
+            # If paragraph fits in one chunk, use it as-is
+            if len(paragraph) <= max_chunk_size:
+                chunks.append(paragraph)
             else:
-                current_chunk.append(sentence)
-                current_length += len(sentence)
-
-        if current_chunk:
-            chunks.append(" ".join(current_chunk))
-
+                # Split long paragraphs by sentences
+                sentences = re.split(r'(?<=[.!?])\s+', paragraph)
+                current_chunk = []
+                current_length = 0
+                
+                for sentence in sentences:
+                    if current_length + len(sentence) > max_chunk_size and current_length >= min_chunk_size:
+                        chunks.append(" ".join(current_chunk))
+                        current_chunk = [sentence]
+                        current_length = len(sentence)
+                    else:
+                        current_chunk.append(sentence)
+                        current_length += len(sentence)
+                
+                if current_chunk:
+                    chunks.append(" ".join(current_chunk))
+        
         return chunks

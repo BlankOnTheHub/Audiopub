@@ -16,18 +16,27 @@ class AudioProcessor:
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         sf.write(filepath, wav_data, sample_rate)
 
-    def stitch_chunks(self, chunk_files: List[str], output_path: str, crossfade_ms: int = 50):
+    def stitch_chunks(self, chunk_files: List[str], output_path: str, crossfade_ms: int = None, silence_ms: int = None):
         """
-        Stitches multiple WAV files into one with crossfade.
+        Stitches multiple WAV files into one with crossfade and optional silence padding.
         """
+        if crossfade_ms is None:
+            crossfade_ms = self.config.CROSSFADE_MS
+        if silence_ms is None:
+            silence_ms = self.config.SILENCE_PADDING_MS
+            
         if not chunk_files:
             return
 
         combined = AudioSegment.from_wav(chunk_files[0])
+        
+        # Create silence segment
+        silence = AudioSegment.silent(duration=silence_ms)
 
         for f in chunk_files[1:]:
             next_seg = AudioSegment.from_wav(f)
-            # Crossfade
+            # Add silence, then crossfade into next segment
+            combined = combined + silence
             combined = combined.append(next_seg, crossfade=crossfade_ms)
 
         combined.export(output_path, format="wav")
