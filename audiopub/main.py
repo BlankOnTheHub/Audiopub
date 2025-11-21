@@ -3,6 +3,7 @@ import asyncio
 from nicegui import ui, app, run
 from audiopub import config
 from audiopub.core.worker import Worker
+from audiopub.file_picker import LocalFilePicker
 import glob
 import html
 
@@ -143,6 +144,33 @@ def index():
     worker.log_callback = update_log
     worker.progress_callback = update_progress
 
+    def pick_epub():
+        def on_pick(path):
+            state['epub_path'] = path
+            epub_input.set_value(path)
+
+        start_dir = os.path.dirname(state['epub_path']) if state['epub_path'] and os.path.exists(os.path.dirname(state['epub_path'])) else '.'
+        picker = LocalFilePicker(
+            directory=start_dir,
+            on_select=on_pick,
+            mode='file'
+        )
+        picker.set_extension_filter('.epub')
+        picker.open()
+
+    def pick_output():
+        def on_pick(path):
+            state['output_dir'] = path
+            out_input.set_value(path)
+
+        start_dir = state['output_dir'] if state['output_dir'] and os.path.exists(state['output_dir']) else '.'
+        picker = LocalFilePicker(
+            directory=start_dir,
+            on_select=on_pick,
+            mode='dir'
+        )
+        picker.open()
+
     async def start_conversion():
         if not state['epub_path']:
             ui.notify('Please select an EPUB file.', type='warning', icon='warning')
@@ -193,22 +221,30 @@ def index():
                 # EPUB
                 with ui.column().classes('w-full gap-1'):
                     ui.label('SOURCE FILE').classes('text-xs font-bold text-slate-500 tracking-widest')
-                    epub_input = ui.input(value=state['epub_path'], placeholder='/path/to/book.epub') \
-                        .bind_value(state, 'epub_path') \
-                        .props('outlined rounded dense dark color="secondary" bg-color="transparent"') \
-                        .classes('w-full input-dark font-mono text-sm')
-                    with epub_input.add_slot('prepend'):
-                        ui.icon('book', color='slate-400')
+                    with ui.row().classes('w-full gap-2'):
+                        epub_input = ui.input(value=state['epub_path'], placeholder='/path/to/book.epub') \
+                            .bind_value(state, 'epub_path') \
+                            .props('outlined rounded dense dark color="secondary" bg-color="transparent"') \
+                            .classes('flex-grow input-dark font-mono text-sm')
+                        with epub_input.add_slot('prepend'):
+                            ui.icon('book', color='slate-400')
+                        ui.button(icon='folder_open', on_click=pick_epub) \
+                            .props('unelevated dense color="slate-800"') \
+                            .classes('aspect-square')
 
                 # OUTPUT
                 with ui.column().classes('w-full gap-1'):
                     ui.label('OUTPUT DESTINATION').classes('text-xs font-bold text-slate-500 tracking-widest')
-                    out_input = ui.input(value=state['output_dir'], placeholder='/output/path') \
-                        .bind_value(state, 'output_dir') \
-                        .props('outlined rounded dense dark color="secondary" bg-color="transparent"') \
-                        .classes('w-full input-dark font-mono text-sm')
-                    with out_input.add_slot('prepend'):
-                        ui.icon('folder', color='slate-400')
+                    with ui.row().classes('w-full gap-2'):
+                        out_input = ui.input(value=state['output_dir'], placeholder='/output/path') \
+                            .bind_value(state, 'output_dir') \
+                            .props('outlined rounded dense dark color="secondary" bg-color="transparent"') \
+                            .classes('flex-grow input-dark font-mono text-sm')
+                        with out_input.add_slot('prepend'):
+                            ui.icon('folder', color='slate-400')
+                        ui.button(icon='folder_open', on_click=pick_output) \
+                            .props('unelevated dense color="slate-800"') \
+                            .classes('aspect-square')
 
                 # VOICE
                 with ui.column().classes('w-full gap-1'):
@@ -268,4 +304,5 @@ def index():
                 update_log("> System initialized.")
                 update_log("> Ready to process.")
 
-ui.run(title='Audiopub', reload=False)
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run(title='Audiopub', reload=False)
