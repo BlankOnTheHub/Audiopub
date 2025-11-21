@@ -1,65 +1,49 @@
 # Audiopub
 
-A local desktop application to convert EPUB ebooks into .m4b audiobooks using Supertone's Supertonic TTS.
+![Audiopub Screenshot](screenshot.png)
+
+**Turn your EPUBs into high-fidelity audiobooks locally.**
+
+Audiopub is a slick, desktop-based power tool that converts ebooks into chapterized .m4b audiobooks using **Supertone's Supertonic TTS**. It runs entirely on your machine—no cloud APIs, no per-character fees.
 
 ## Features
 
-- **Local Processing:** Uses ONNX Runtime for high-quality, local text-to-speech.
-- **NiceGUI Interface:** Modern, responsive web-based UI (runs as a desktop app).
-- **Smart Chunking:** Splits text by sentence boundaries to preserve flow.
-- **Resume Capability:** Skips already generated chunks/chapters if restarted.
-- **Muxing:** Creates chapterized .m4b files with metadata.
+*   **⚡ Local & Private:** Powered by ONNX Runtime. Zero data leaves your rig.
+*   **💎 Deep Dark UI:** A beautiful, responsive glass-morphism interface built with NiceGUI.
+*   **🧠 Smart Context:** Splits text intelligently by sentence to maintain narrative flow.
+*   **⏯️ Resumable:** Crash? Quit? No problem. Resume exactly where you left off.
+*   **📦 Auto-Muxing:** Outputs ready-to-listen `.m4b` files with proper metadata and chapters.
 
-## Prerequisites
+## Quick Start
 
-1. **Python 3.9+**
-2. **FFmpeg**: Must be installed and available in your system PATH.
-   - Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH.
-   - Linux: `sudo apt install ffmpeg`
-   - macOS: `brew install ffmpeg`
+1.  **Install:**
+    ```bash
+    git clone https://github.com/yourusername/audiopub.git
+    cd audiopub
+    git lfs pull  # Essential: Downloads the AI models
+    pip install -r requirements.txt
+    ```
 
-## Installation
+2.  **Run:**
+    ```bash
+    export PYTHONPATH=$PYTHONPATH:.
+    python audiopub/main.py
+    ```
 
-1. Clone the repository.
-2. Install Python dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+3.  **Generate:**
+    *   Open the UI (it launches automatically).
+    *   Select your EPUB and Voice.
+    *   Hit **Generate**.
 
+## Requirements
 
-## Model Setup (Git LFS)
+*   **Python 3.9+**
+*   **FFmpeg** (Must be in your PATH)
+*   **Git LFS** (For model weights)
 
-This application requires the Supertonic ONNX models. These are large files stored via Git LFS.
+## Voice Styles
 
-1. Ensure you have Git LFS installed: `git lfs install`
-2. If you cloned the repo without LFS, pull the actual model files:
-   ```bash
-   git lfs pull
-   ```
-   *Note: The application checks for these files on startup. If they are small (<10MB), it will warn you.*
+Drop your custom `.json` voice style configs into `audiopub/assets/`. The app will auto-detect them.
 
-3. Place your Voice Style JSON files in `audiopub/assets/` (or subdirectories).
-
-## Usage
-
-1. Run the application:
-   ```bash
-   python audiopub/main.py
-   ```
-2. The UI will open in your default browser (or native window if configured).
-3. Select your EPUB file.
-4. Select an Output Directory.
-5. Select a Voice from the dropdown.
-6. Click **Start Conversion**.
-
-## Configuration
-
-You can adjust advanced settings in `audiopub/config.py`:
-- `FFMPEG_BINARY`: Path to ffmpeg executable if not in PATH.
-- `CROSSFADE_MS`: Duration of crossfade between sentences.
-- `SAMPLE_RATE`: Output sample rate.
-
-## Troubleshooting
-
-- **"File is too small" error:** Run `git lfs pull` to download the actual model weights.
-- **"ffmpeg not found":** Install FFmpeg or update `audiopub/config.py` with the full path to the binary.
+---
+*Built for audiophiles who code.*
