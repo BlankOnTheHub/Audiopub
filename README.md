@@ -32,14 +32,17 @@ Audiopub is a slick, desktop-based power tool that converts ebooks into chapteri
 
 2.  **Run:**
     ```bash
-    export PYTHONPATH=$PYTHONPATH:.
     python audiopub/main.py
     ```
+    The WebUI launches automatically at `http://localhost:8080`
 
 3.  **Generate:**
-    *   Open the UI (it launches automatically).
-    *   Select your EPUB and Voice.
-    *   Hit **Generate**.
+    *   Select your EPUB and Voice
+    *   GPU acceleration is **enabled by default** with 16-step quality setting
+    *   Adjust GPU toggle and inference steps as needed in the UI
+    *   Hit **Generate** and enjoy high-quality audiobooks at 6-10x faster speed! ⚡
+
+**Note:** GPU is automatically configured on startup. For manual setup or troubleshooting, see [GPU_SETUP.md](GPU_SETUP.md).
 
 ## Requirements
 
@@ -90,44 +93,69 @@ export AUDIOPUB_TTS_ENGINE=supertonic
 
 ## GPU Acceleration
 
-### Enabling GPU Support
+### Default Configuration
 
-Audiopub supports GPU acceleration via ONNX Runtime's CUDA provider, offering up to **10x faster synthesis** on NVIDIA GPUs.
+✅ **GPU acceleration is enabled by default** in the WebUI with quality-focused settings (16-step inference for balanced quality/speed).
 
 **In the WebUI:**
-1. Toggle the **"GPU ACCELERATION"** switch
-2. Adjust **"INFERENCE STEPS"** slider (2-128)
-   - Lower steps = faster (2-5 for real-time)
-   - Higher steps = better quality (16+ recommended)
+1. **"GPU ACCELERATION"** toggle starts as **ON**
+2. **"INFERENCE STEPS"** defaults to **16** (balanced quality)
+3. Adjust steps with the slider (2-128) anytime:
+   - 2-5 steps: Real-time/streaming (fastest, lower quality)
+   - 16 steps: Balanced quality/speed (default)
+   - 32+ steps: High quality (slower, best audio)
+
+### Setup
+
+**Automatic (Recommended):**
+GPU support is automatically configured on startup if available.
+
+**Manual Setup:**
+If you need to manually enable GPU:
+```bash
+# Enable GPU for current shell session
+source setup_gpu.sh
+
+# Or add to your ~/.bashrc or ~/.zshrc
+```
 
 **Requirements:**
 - NVIDIA GPU with CUDA support
 - CUDA 11.8+ or 12.x
-- Install GPU-enabled ONNX Runtime:
-  ```bash
-  pip install onnxruntime-gpu
-  ```
+- `onnxruntime-gpu` installed (installed by default)
 
 ### Benchmarking
 
 Test GPU performance on your hardware:
 
 ```bash
-# CPU benchmark
+# CPU-only benchmark
 python benchmark_gpu.py
 
-# GPU benchmark
+# GPU benchmark (with CUDA setup)
+source setup_gpu.sh
 python benchmark_gpu.py --gpu --steps 2,5,16,32,64,128
 
-# Save results
-python benchmark_gpu.py --gpu --output results.json
+# Save results for comparison
+python benchmark_gpu.py --gpu --output gpu_results.json
 ```
 
-**Expected Performance (RTX4090 vs M4 Pro CPU):**
+**Real-World Performance Examples:**
+
+**RTX 2070 (Tested):**
+```
+Steps  | GPU Speed      | CPU Speed    | Speedup
+-------|----------------|--------------|--------
+2      | 1915-3614 c/s  | 182-409 c/s  | 8.8-10.5x
+16     | 534-1091 c/s   | 89-163 c/s   | 6.0-6.7x
+32     | 285-606 c/s    | 56-98 c/s    | 5.1-6.2x
+```
+
+**Expected Performance (RTX4090):**
 - GPU: ~12,000 chars/sec (2-step) → ~600 chars/sec (16-step)
 - CPU: ~1,200 chars/sec (2-step) → ~400 chars/sec (16-step)
 
-See [GPU_BENCHMARKING.md](GPU_BENCHMARKING.md) for detailed performance tuning, PyTorch fallback options, and troubleshooting.
+See [GPU_SETUP.md](GPU_SETUP.md), [GPU_DEFAULTS.md](GPU_DEFAULTS.md), and [GPU_BENCHMARKING.md](GPU_BENCHMARKING.md) for detailed setup, configuration, performance tuning, and troubleshooting.
 
 ---
 
