@@ -1,0 +1,294 @@
+{
+  "project": {
+    "name": "Audiopub",
+    "description": "Local EPUB to audiobook converter using ONNX TTS engines",
+    "version": "1.0.0",
+    "python_version": "3.9+",
+    "license": "MIT",
+    "repository": "https://github.com/hebbihebb/audiopub",
+    "author": "hebbihebb"
+  },
+  "architecture": {
+    "pattern": "linear-pipeline",
+    "entry_point": "audiopub/main.py",
+    "core_invariants": [
+      "local-first (no cloud APIs as primary)",
+      "onnx-runtime-required",
+      "gpu-optional-not-required",
+      "pluggable-tts-engines",
+      "m4b-output-format",
+      "no-telemetry"
+    ]
+  },
+  "modules": [
+    {
+      "name": "Main UI",
+      "path": "audiopub/main.py",
+      "role": "Web server, state management, user interface",
+      "dependencies": ["nicegui", "worker", "config", "file_picker"],
+      "editable": true,
+      "constraints": []
+    },
+    {
+      "name": "TTS Base",
+      "path": "audiopub/core/tts_base.py",
+      "role": "Abstract TTS interface for factory pattern",
+      "dependencies": [],
+      "editable": false,
+      "constraints": [
+        "method_signatures_locked",
+        "abstract_methods_locked"
+      ],
+      "reason_locked": "All TTS engines inherit from this. Breaking method signatures breaks the factory pattern and all implementations."
+    },
+    {
+      "name": "Supertone TTS",
+      "path": "audiopub/core/tts.py",
+      "role": "ONNX-based TTS synthesis engine",
+      "dependencies": [
+        "tts_base",
+        "onnxruntime",
+        "numpy"
+      ],
+      "editable": true,
+      "constraints": [
+        "model_loading_locked",
+        "onnx_input_output_names_locked"
+      ],
+      "safe_changes": [
+        "voice style management",
+        "performance optimizations",
+        "GPU/CPU fallback logic",
+        "caching strategies"
+      ],
+      "unsafe_changes": [
+        "change ONNX model loading mechanism",
+        "rename ONNX input/output nodes",
+        "voice style JSON schema"
+      ]
+    },
+    {
+      "name": "NeuTTS Air",
+      "path": "audiopub/core/tts_neutts.py",
+      "role": "Neuphonic voice cloning TTS engine",
+      "dependencies": [
+        "tts_base",
+        "neuphonic",
+        "espeak"
+      ],
+      "editable": true,
+      "constraints": [],
+      "safe_changes": [
+        "voice cloning parameters",
+        "reference audio management",
+        "performance optimizations"
+      ]
+    },
+    {
+      "name": "TTS Factory",
+      "path": "audiopub/core/tts_factory.py",
+      "role": "Factory pattern for TTS engine instantiation",
+      "dependencies": [
+        "tts_base",
+        "tts",
+        "tts_neutts",
+        "config"
+      ],
+      "editable": true,
+      "constraints": [
+        "must_respect_tts_base_interface"
+      ]
+    },
+    {
+      "name": "EPUB Parser",
+      "path": "audiopub/core/epub.py",
+      "role": "EPUB extraction and chapter detection",
+      "dependencies": [
+        "ebooklib",
+        "beautifulsoup4",
+        "nltk"
+      ],
+      "editable": true,
+      "constraints": [
+        "chapter_boundary_detection_locked"
+      ],
+      "reason_locked": "Affects chapter metadata accuracy and user experience",
+      "safe_changes": [
+        "text cleaning",
+        "special character handling",
+        "parsing optimizations",
+        "EPUB format variations"
+      ]
+    },
+    {
+      "name": "Audio Assembly",
+      "path": "audiopub/core/audio.py",
+      "role": "Text chunking, audio mixing, M4B muxing",
+      "dependencies": [
+        "pydub",
+        "soundfile",
+        "ffmpeg",
+        "numpy",
+        "nltk"
+      ],
+      "editable": true,
+      "constraints": [
+        "chapter_silence_5s_locked",
+        "m4b_format_locked"
+      ],
+      "reason_locked": "Chapter silence (5s) is user-facing; M4B format is output contract",
+      "safe_changes": [
+        "silence_duration as config parameter",
+        "audio concatenation optimizations",
+        "metadata embedding improvements"
+      ]
+    },
+    {
+      "name": "Worker Orchestration",
+      "path": "audiopub/core/worker.py",
+      "role": "Coordinate EPUB→TTS→M4B pipeline",
+      "dependencies": [
+        "epub",
+        "audio",
+        "tts_factory",
+        "config"
+      ],
+      "editable": true,
+      "constraints": [
+        "interrupt_logic_locked",
+        "operation_order_locked"
+      ],
+      "safe_changes": [
+        "error handling",
+        "retry logic",
+        "performance metrics",
+        "logging improvements"
+      ]
+    },
+    {
+      "name": "Configuration",
+      "path": "audiopub/config.py",
+      "role": "Centralized settings and defaults",
+      "dependencies": [],
+      "editable": true,
+      "constraints": [
+        "must_allow_offline_operation",
+        "default_config_must_work"
+      ],
+      "safe_changes": [
+        "add optional parameters with defaults",
+        "environment variable support",
+        "config organization"
+      ]
+    },
+    {
+      "name": "File Picker",
+      "path": "audiopub/file_picker.py",
+      "role": "Native file selection dialog",
+      "dependencies": [],
+      "editable": true,
+      "constraints": []
+    }
+  ],
+  "dependencies": {
+    "runtime": {
+      "nicegui": "^3.3.0",
+      "onnxruntime": "^1.23.0",
+      "pydub": "^0.25.1",
+      "soundfile": "^0.13.0",
+      "ebooklib": "^0.18",
+      "beautifulsoup4": "^4.12.0",
+      "numpy": "^2.0.0",
+      "nltk": "^3.8",
+      "lxml": "latest"
+    },
+    "optional": {
+      "onnxruntime-gpu": "^1.23.0 (CUDA support for faster inference)",
+      "neuphonic": "latest (for NeuTTS Air voice cloning)"
+    },
+    "external": {
+      "ffmpeg": "required for M4B muxing",
+      "git-lfs": "required for downloading ONNX model files",
+      "espeak": "optional, for NeuTTS Air voice cloning"
+    }
+  },
+  "rules": {
+    "editing": {
+      "always_safe": [
+        "Add new voice styles (JSON files in audiopub/assets/voice_styles/)",
+        "Performance optimizations (caching, vectorization, faster algorithms)",
+        "Add unit tests (pytest or unittest)",
+        "Refactor private methods (_load_model, etc)",
+        "Fix bugs in error handling",
+        "Improve logging and diagnostics",
+        "Add optional config parameters (with sensible defaults)"
+      ],
+      "requires_review": [
+        "Add new TTS engines (must subclass TTSBase)",
+        "Change ONNX model loading logic",
+        "Modify chapter silence duration (5s)",
+        "Change text chunking algorithm",
+        "Add cloud API integration",
+        "Remove or rename public method signatures",
+        "Change M4B output format"
+      ],
+      "must_never_do": [
+        "Remove or rename methods in tts_base.py",
+        "Change M4B output format",
+        "Remove CPU inference support",
+        "Add cloud TTS as primary (local-first is sacred)",
+        "Commit without explaining the reasoning",
+        "Break chapter boundary detection",
+        "Add telemetry or analytics"
+      ]
+    },
+    "testing": [
+      "Code must run on CPU (required)",
+      "Code must run on GPU if GPU logic was touched",
+      "EPUB parsing tested with diverse EPUB formats",
+      "M4B output must play in standard player",
+      "Chapter metadata must survive M4B muxing",
+      "No new cloud dependencies without approval",
+      "Logging is informative but not verbose (no spam)"
+    ],
+    "commits": {
+      "format": "[COMPONENT] Brief description",
+      "must_include_reasoning": true,
+      "body_format": "2-4 lines explaining why change was needed, what invariants preserved",
+      "branches": ["audiopub-implementation", "main"]
+    }
+  },
+  "phases": {
+    "current": "Phase 4: Performance & Optimization",
+    "status": "in-progress",
+    "completed_phases": [
+      "Phase 1: Foundation",
+      "Phase 2: UI & UX",
+      "Phase 3: Engine Flexibility"
+    ],
+    "blockers": [
+      {
+        "description": "Batch inference requires async/await refactor for thread-safety",
+        "blocker": "Need architecture review of ONNX session sharing",
+        "decision_needed": "Should batch size be configurable or auto-tuned?"
+      },
+      {
+        "description": "Model quantization",
+        "blocker": "Need to decide on auto-quantize vs. user-selected",
+        "decision_needed": "Should quantization happen automatically on first run?"
+      }
+    ]
+  },
+  "assistant_guidelines": {
+    "role": "You are an AI coding assistant helping maintain Audiopub",
+    "must_read_first": [
+      "STRATEGY.md (project philosophy)",
+      "ARCHITECTURE.md (module constraints)",
+      "AGENT_GUIDE.md (operating procedures)"
+    ],
+    "safe_actions": "See rules.editing.always_safe",
+    "unsafe_actions": "See rules.editing.must_never_do",
+    "approval_needed": "See rules.editing.requires_review",
+    "when_blocked": "Update ROADMAP.md with blocker details, ask in PR description, do not work around constraints"
+  }
+}

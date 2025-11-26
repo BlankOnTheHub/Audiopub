@@ -1,0 +1,319 @@
+# MODULE_MAP.yaml – Audiopub Module Constraints & Dependencies
+
+project: Audiopub
+version: "1.0.0"
+description: "Local EPUB to audiobook converter using ONNX TTS"
+
+# Module Definitions with Constraints
+modules:
+
+  tts_base:
+    path: audiopub/core/tts_base.py
+    description: Abstract TTS engine interface
+    role: interface
+    dependencies: []
+    constraints:
+      method_signatures_locked: true
+      abstract_methods_locked: true
+      must_remain_abstract: true
+    why_locked: |
+      All TTS engines inherit from this. Changing method signatures breaks:
+      - tts.py (Supertone implementation)
+      - tts_neutts.py (NeuTTS Air implementation)
+      - tts_factory.py (instantiation logic)
+      - worker.py (orchestration)
+    can_edit: false
+    edit_scope: "Docstrings only"
+
+  tts_supertone:
+    path: audiopub/core/tts.py
+    description: Supertone ONNX TTS engine
+    role: implementation
+    depends_on:
+      - tts_base
+      - onnxruntime
+      - numpy
+    constraints:
+      model_loading_locked: true
+      onnx_input_output_names_locked: true
+    why_locked: |
+      ONNX model loading affects reproducibility and cross-platform compatibility.
+      Renaming ONNX nodes breaks the inference pipeline.
+    can_edit: true
+    safe_changes:
+      - Load and cache voice style JSON files
+      - GPU/CPU fallback optimization
+      - ONNX session pooling/caching
+      - Add performance metrics
+      - Improve error handling
+    unsafe_changes:
+      - Change ONNX model loading path/mechanism
+      - Rename ONNX input/output node names
+      - Modify voice style JSON schema (requires updating all voices)
+    notes: |
+      Voice style files are in audiopub/assets/voice_styles/*.json
+      Current voices: F1.json, F2.json, M1.json, M2.json, F1_deep_female.json
+
+  tts_neutts_air:
+    path: audiopub/core/tts_neutts.py
+    description: Neuphonic voice cloning TTS engine
+    role: implementation
+    depends_on:
+      - tts_base
+      - neuphonic
+      - espeak
+    constraints: {}
+    can_edit: true
+    safe_changes:
+      - Voice cloning parameter tuning
+      - Reference audio management
+      - Performance optimization
+    unsafe_changes:
+      - Break TTSBase contract (inherited methods)
+
+  tts_factory:
+    path: audiopub/core/tts_factory.py
+    description: Factory pattern for TTS engine instantiation
+    role: factory
+    depends_on:
+      - tts_base
+      - tts
+      - tts_neutts
+      - config
+    constraints:
+      must_respect_tts_base_interface: true
+    can_edit: true
+    safe_changes:
+      - Add new engine types
+      - Improve factory instantiation logic
+      - Add engine validation
+    instructions_for_new_engine: |
+      1. Create new file: audiopub/core/tts_newengine.py
+      2. Subclass TTSBase
+      3. Implement synthesize() method
+      4. Register in TTSFactory.create()
+      5. Add to config.SUPPORTED_ENGINES
+      6. Test instantiation
+
+  epub_parser:
+    path: audiopub/core/epub.py
+    description: EPUB parsing and text extraction
+    role: parser
+    depends_on:
+      - ebooklib
+      - beautifulsoup4
+      - nltk
+    constraints:
+      chapter_boundary_detection_locked: true
+    why_locked: |
+      Chapter boundary detection directly affects:
+      - Chapter metadata accuracy
+      - User experience (chapter skip/navigation)
+      - M4B chapter marks
+    can_edit: true
+    safe_changes:
+      - Text cleaning (smart quotes, whitespace normalization)
+      - Special character handling
+      - Parsing performance optimization
+      - Support for more EPUB format variations
+      - Better error messages for malformed EPUBs
+    unsafe_changes:
+      - Change chapter boundary detection algorithm
+      - Modify chapter identification heuristics
+    testing_required: |
+      Test with diverse EPUB formats:
+      - Different publishers (O'Reilly, Tor, Smashwords, etc.)
+      - Different encoding (UTF-8, UTF-16, etc.)
+      - With and without embedded fonts/images
+      - DRM-free commercial and indie EPUBs
+
+  audio_processor:
+    path: audiopub/core/audio.py
+    description: Text chunking, audio mixing, M4B assembly
+    role: processor
+    depends_on:
+      - pydub
+      - soundfile
+      - ffmpeg
+      - numpy
+      - nltk
+    constraints:
+      chapter_silence_5s_locked: true
+      m4b_format_locked: true
+    why_locked: |
+      Chapter silence (5s) is user-facing:
+      - Affects audiobook pacing
+      - Changing without testing impacts user experience
+
+      M4B format is the output contract:
+      - Player compatibility depends on format stability
+      - Chapter metadata must survive encoding
+    can_edit: true
+    safe_changes:
+      - Add silence_duration as config parameter (preserve 5s default)
+      - Audio concatenation optimization
+      - Metadata embedding improvements
+      - Performance optimization (vectorization, caching)
+    unsafe_changes:
+      - Change chapter silence from 5s (without config option)
+      - Change M4B container format
+      - Remove chapter metadata embedding
+    testing_required: |
+      - M4B output must play in standard players:
+        * Apple Books (iOS/macOS)
+        * Google Play Books (Android)
+        * Audible/Kindle (if supported)
+      - Chapter marks must be accurate
+      - Metadata must survive encoding
+      - Test with various chapter counts (1, 5, 50+)
+
+  worker:
+    path: audiopub/core/worker.py
+    description: Orchestrate EPUB→TTS→M4B pipeline
+    role: orchestrator
+    depends_on:
+      - epub
+      - audio
+      - tts_factory
+      - config
+    constraints:
+      interrupt_logic_locked: true
+      operation_order_locked: true
+    why_locked: |
+      Interrupt logic ensures user can stop synthesis at any time.
+      Operation order (parse → chunk → synthesize → assemble) is critical:
+      - Changing order breaks the pipeline
+      - Skip steps silently affect output quality
+    can_edit: true
+    safe_changes:
+      - Error handling improvements
+      - Retry logic (with limits)
+      - Performance metrics collection
+      - Logging and diagnostics improvements
+      - Memory optimization
+    unsafe_changes:
+      - Remove interrupt signal checks
+      - Change operation order
+      - Skip synthesis steps
+
+  main_ui:
+    path: audiopub/main.py
+    description: NiceGUI web interface
+    role: ui
+    depends_on:
+      - nicegui
+      - worker
+      - config
+      - file_picker
+    constraints:
+      ui_state_must_be_thread_safe: true
+    can_edit: true
+    safe_changes:
+      - Add new UI elements
+      - Improve layout/styling
+      - Add new user-facing settings
+      - Improve progress reporting
+      - Add new API endpoints (serve files, etc)
+    unsafe_changes:
+      - Blocking calls in UI thread (breaks responsiveness)
+      - Direct state mutation without app.call_after_dark()
+      - Hard-code worker thread synchronization
+    best_practices: |
+      - Use app.call_after_dark() for UI updates from worker thread
+      - Sanitize file paths before passing to worker
+      - Test file picker on Windows, macOS, Linux
+
+  config:
+    path: audiopub/config.py
+    description: Centralized configuration
+    role: configuration
+    depends_on: []
+    constraints:
+      must_allow_offline_operation: true
+      default_config_must_work: true
+    can_edit: true
+    safe_changes:
+      - Add optional parameters (with sensible defaults)
+      - Environment variable support
+      - Config file organization
+      - Config validation
+    unsafe_changes:
+      - Require cloud API keys as defaults
+      - Remove GPU fallback to CPU
+      - Require internet connection for defaults
+
+# Global Invariants (Cross-Module)
+invariants:
+  system_level:
+    - All TTS processing must be local (no cloud APIs as primary)
+    - CPU inference must always work (GPU is optimization only)
+    - M4B is the only output format
+    - Chapter metadata must survive M4B muxing
+    - No telemetry or user tracking
+    - All file I/O must be local or documented
+
+  dependency_level:
+    - No circular dependencies between modules
+    - tts.py must not import from worker.py
+    - audio.py must not import from main.py
+    - worker.py should not import from main.py (except callbacks)
+    - All modules can import config.py
+
+  quality_level:
+    - Chapter boundaries must be accurately detected
+    - Silence gaps between chapters must be preserved (5s default)
+    - ONNX models must load reproducibly
+    - Audio output must be valid WAV/M4B
+    - Logging must be informative without spam
+
+# Module Editing Summary
+modules_by_editability:
+  locked_interfaces:
+    - tts_base.py
+  locked_mechanisms:
+    - tts.py (ONNX loading)
+    - epub.py (chapter detection)
+    - audio.py (silence duration, M4B format)
+    - worker.py (interrupt logic, operation order)
+  fully_editable:
+    - main.py
+    - tts_factory.py
+    - tts_neutts.py
+    - config.py
+    - file_picker.py
+
+# Performance Optimization Opportunities
+optimization_opportunities:
+  completed:
+    - GPU acceleration (ONNX CUDA support)
+    - ONNX session caching
+    - Configurable inference steps
+
+  in_progress:
+    - Batch inference for parallelism
+    - Model quantization (INT8)
+
+  planned:
+    - Audio format compression
+    - Chunk-level parallelization
+    - GPU memory management
+
+# Dependencies by Category
+external_tools:
+  required:
+    - ffmpeg: "M4B muxing via libfdk-aac"
+    - git-lfs: "ONNX model distribution"
+  optional:
+    - espeak: "NeuTTS Air voice cloning"
+    - cuda-toolkit: "GPU acceleration"
+
+python_packages:
+  core:
+    - nicegui: "Web UI framework"
+    - onnxruntime: "TTS inference runtime"
+    - ebooklib: "EPUB parsing"
+    - pydub: "Audio mixing"
+    - soundfile: "WAV file I/O"
+  optional:
+    - onnxruntime-gpu: "GPU acceleration"
+    - neuphonic: "Voice cloning engine"
