@@ -130,4 +130,27 @@ python benchmark_gpu.py --gpu --output results.json
 See [GPU_BENCHMARKING.md](GPU_BENCHMARKING.md) for detailed performance tuning, PyTorch fallback options, and troubleshooting.
 
 ---
+
+## For AI Agents (Claude Code, GitHub Copilot, etc.)
+
+This repository is optimized for AI-assisted development. **Before working on Audiopub:**
+
+1. **Read** [AGENT_NOTES.md](AGENT_NOTES.md) – Quick system prompt (one page)
+2. **Review** [AGENT_GUIDE.md](AGENT_GUIDE.md) – Operating procedures & testing checklist
+3. **Understand** [ARCHITECTURE.md](ARCHITECTURE.md) – Module boundaries & what's locked
+
+**Key constraints:**
+- ✅ Safe changes: Add voice styles, optimize performance, fix bugs, add tests
+- ❌ Unsafe changes: Remove CPU support, break TTS factory, add cloud APIs, remove channel boundaries
+- 🔒 Locked files: `tts_base.py` (method signatures), some aspects of `audio.py`, `epub.py`, `worker.py`
+
+**Additional context:**
+- [STRATEGY.md](STRATEGY.md) – Project philosophy & non-negotiable constraints
+- [ENTRYPOINTS.md](ENTRYPOINTS.md) – Module map & data flow diagrams
+- [ROADMAP.md](ROADMAP.md) – Phase tracking & current blockers
+- [repo_manifest.json](repo_manifest.json) – Machine-readable metadata
+
+These documents live in the repo permanently and are updated as the project evolves.
+
+---
 *Built for audiophiles who code.*
